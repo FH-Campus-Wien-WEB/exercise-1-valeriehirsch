@@ -5,33 +5,151 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movies!</title>
     <style>
-        /**/
-        /* Part 3: Your styling goes here */
+        /* General page styling */
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f9f9f9;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        /* Movie container */
+        .movie {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #fff;
+            display: flex;
+            gap: 15px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .movie img {
+            width: auto;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .movie-info {
+            flex: 1;
+        }
+
+        .movie-info h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.2em;
+            color: #222;
+        }
+
+        .movie-info p {
+            margin: 5px 0;
+            color: #555;
+        }
+
+        .movie-info p.genres span {
+            transition: color 0.3s, font-weight 0.3s;
+            cursor: default;
+        }
+
+        .movie-info p.genres span:hover {
+            color: #d6336c;
+            font-weight: bold;
+        }
+
+        .rating {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-right: 5px;
+         }
+
+        .rating.good {
+            background-color: #28a745; /* green */
+        }
+
+        .rating.medium {
+            background-color: #ffc107; /* yellow/orange */
+            color: #333;
+        }
+
+        .rating.bad {
+            background-color: #dc3545; /* red */
+        }
+
     </style>
-    <script>
-        function reverseString(s) {
-            return s.split("").reverse().join("");
-        }
-
-        window.onload = function () {
-            const xhr = new XMLHttpRequest()
-            xhr.onload = function () {
-                const bodyElement = document.querySelector("body")
-                if (xhr.status == 200) {
-		            /* Part 2: Build the HTML elements here and append them to the body */ 
-                    bodyElement.append(reverseString(xhr.responseText))
-                } else {
-                    bodyElement.append("Daten konnten nicht geladen werden, Status " + xhr.status + " - " + xhr.statusText)
-                }
-            }
-            xhr.open("GET", "/movies")
-            xhr.send()
-        }
-    </script>
-
+ 
 </head>
 
 <body>
+
+<h1> Top 5 Movies OAT</h1>
+<div id="movies-container"></div>
+
+<script>
+    fetch('/movies')
+    .then(response1 => response1.json())
+    .then(movies => {
+        const container = document.getElementById('movies-container');
+        movies.forEach(movie => {
+            const movieDiv = document.createElement('div');
+            movieDiv.className = 'movie';
+
+        const poster = document.createElement('img');
+        poster.src = movie.Poster;
+        poster.alt = movie.Title;
+        movieDiv.appendChild(poster);
+
+        //Ratings
+        let imdbClass = 'good';
+        if (movie.imdbRating <= 7) {
+            imdbClass = 'medium';
+        } else if (movie.imdbRating <= 5) {
+            imdbClass = 'bad';
+        }
+
+        let metaClass = 'good';
+        if (movie.Metascore <= 70) {
+            metaClass = 'medium';
+        } else if (movie.Metascore <= 50) {
+            metaClass = 'bad';
+        }
+
+        const imdbHTML = `<span class="rating ${imdbClass}">IMDB Rating: ${movie.imdbRating}</span>`;
+        const metaHTML = `<span class="rating ${metaClass}">Metascore: ${movie.Metascore}</span>`;
+
+        const infoDiv = document.createElement('div');
+        infoDiv.innerHTML = `
+            <h2>${movie.Title} (${movie.Released})</h2>
+            <p>Runtime: ${movie.Runtime} min</p>
+            <p>Genres: ${movie.Genres.join(', ')}</p>
+            <p>Directors: ${movie.Directors.join(', ')}</p>
+            <p>Writers: ${movie.Writers.join(', ')}</p>
+            <p>Actors: ${movie.Actors.join(', ')}</p>
+            <p> ${imdbHTML}</p>
+            <p>${metaHTML}</p>
+            <p>Plot: ${movie.Plot}</p>
+        `;
+        movieDiv.appendChild(infoDiv);
+
+        
+        container.appendChild(movieDiv);
+
+
+        });
+    })
+            
+
+
+
+</script>
+
 </body>
 
 </html>
